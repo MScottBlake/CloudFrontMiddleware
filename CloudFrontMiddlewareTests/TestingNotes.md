@@ -252,4 +252,4 @@ assemble_cloudfront_request result:
 https://example.com?Expires=1747270308&Signature=mCHEo~swKdxn9mJfAXi5vodA9-H8XrO5ca8NPrFmQA8crmxgaJqlvl2gOAiECVLbTVFdQeiUtnHK2blvC2edEws8IkemkFhA2hJT4HdpnUWj1uD~JQq8qaqTL1ZmC2ohZQekueajS-ZgJdMGgaumd7iyCFBhxrimOZE-B~iZbE8vxLe-6JuKv2~RXfIaNYBEfQInAJxEpgHXwseKTSaVOFLGp804dgK1QjEM3sQi~LN~2vUrvO73JgqIgq85S6raMhvxD7qPZKfTgngFpT2iWP-x21g7Zvh6Pc9K47Iw4bQeysGZj5UFPZ0Sci5vnvJw9qFu9WDvkCh8iWyh-~b0gg__&Key-Pair-Id=FOO
 ```
 
-The output values were then used as expcted values to test for in the Swift testing.
+The output values were then used as expected values to test for in the Swift testing.
