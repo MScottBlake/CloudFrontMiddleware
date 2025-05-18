@@ -104,8 +104,11 @@ func generateCloudFrontURL(_ url: String) -> String {
 
 class CloudFrontMiddleware: MunkiMiddleware {
     /// Modify the request URL to contain a signature for CloudFront
-    // TODO: don't modify the URL id it's not a CloudFront URL
     func processRequest(_ request: MunkiMiddlewareRequest) -> MunkiMiddlewareRequest {
+        // TODO: don't modify the URL id it's not a CloudFront URL
+        // IOW, check if URL contains cloudfront.net, or a specific domain specified
+        // by the admin in a preference. Similar to how the s3 middleware does it:
+        // let s3endpoint = pref("S3Endpoint") as? String ?? "s3.amazonaws.com"
         let url = generateCloudFrontURL(request.url)
         var modifiedRequest = request
         modifiedRequest.url = url
