@@ -45,7 +45,7 @@ func getPrivateKey() -> SecKey? {
 
 /// Return a request policy signature.
 func signRequestPolicy(_ requestPolicy: String, withKey key: SecKey) -> String {
-    guard let signatureData = sign(Data(requestPolicy.utf8), withKey: key) else {
+    guard let signatureData = signSHA1(Data(requestPolicy.utf8), withKey: key) else {
         return ""
     }
     let signtureString = signatureData.base64EncodedString()
@@ -104,6 +104,7 @@ func generateCloudFrontURL(_ url: String) -> String {
 
 class CloudFrontMiddleware: MunkiMiddleware {
     /// Modify the request URL to contain a signature for CloudFront
+    // TODO: don't modify the URL id it's not a CloudFront URL
     func processRequest(_ request: MunkiMiddlewareRequest) -> MunkiMiddlewareRequest {
         let url = generateCloudFrontURL(request.url)
         var modifiedRequest = request

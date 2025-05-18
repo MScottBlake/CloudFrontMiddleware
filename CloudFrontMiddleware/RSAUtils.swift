@@ -45,7 +45,57 @@ func dataFromPEM(_ pem: String, startTag: String, endTag: String) -> Data? {
     return keyData
 }
 
+/// Removes the PKCS#8 header from the keyData, hopefully returning  PKCS#1 (RSA private key) data
+/// Credit to https://github.com/btnguyen2k/swiftutils/blob/master/SwiftUtils/RSAUtils.swift
+func stripPKCS8Header(_ privkey: Data) -> Data? {
+    if privkey.count == 0 {
+        return nil
+    }
+
+    var keyAsArray = [UInt8](repeating: 0, count: privkey.count / MemoryLayout<UInt8>.size)
+    (privkey as NSData).getBytes(&keyAsArray, length: privkey.count)
+
+    // PKCS#8: magic byte at offset 22, check if it's actually ASN.1
+    var idx = 22
+    if keyAsArray[idx] != 0x04 {
+        return privkey
+    }
+    idx += 1
+
+    // now we need to find out how long the key is, so we can extract the correct hunk
+    // of bytes from the buffer.
+    var len = Int(keyAsArray[idx])
+    idx += 1
+    let det = len & 0x80 // check if the high bit set
+    if det == 0 {
+        // no? then the length of the key is a number that fits in one byte, (< 128)
+        len = len & 0x7F
+    } else {
+        // otherwise, the length of the key is a number that doesn't fit in one byte (> 127)
+        var byteCount = Int(len & 0x7F)
+        if byteCount + idx > privkey.count {
+            return nil
+        }
+        // so we need to snip off byteCount bytes from the front, and reverse their order
+        var accum: UInt = 0
+        var idx2 = idx
+        idx += byteCount
+        while byteCount > 0 {
+            // after each byte, we shove it over, accumulating the value into accum
+            accum = (accum << 8) + UInt(keyAsArray[idx2])
+            idx2 += 1
+            byteCount -= 1
+        }
+        // now we have read all the bytes of the key length, and converted them to a number,
+        // which is the number of bytes in the actual key.  we use this below to extract the
+        // key bytes and operate on them
+        len = Int(accum)
+    }
+    return privkey.subdata(in: idx ..< idx + len)
+}
+
 /// Lifted from Quinn "The Eskimo!": https://developer.apple.com/forums/thread/773777
+/// We're not using this any more, instead uising stripPKCS8Header
 func getRSA2048PrivateKeyDataFromPKCS8Data(_ keyData: Data) -> Data? {
     // Most private key PEMs are in PKCS#8 format.  There’s no way to import
     // that directly.  Instead you need to strip the header to get to the
@@ -76,7 +126,7 @@ func privateKeyDataFromPEM(_ pem: String) -> Data? {
     {
         // -----BEGIN PRIVATE KEY----- is a hint the key data is in PKCS#8 format
         // need to extract the PKCS#1 data from the PKCS#8 data
-        return getRSA2048PrivateKeyDataFromPKCS8Data(keyData)
+        return stripPKCS8Header(keyData)
     }
     return nil
 }
@@ -113,8 +163,7 @@ func rsaPrivateKeyFromPemData(_ pem: Data) -> SecKey? {
 }
 
 /// Sign some data with a private key
-func sign(_ data: Data, withKey key: SecKey) -> Data? {
-    let algorithm = SecKeyAlgorithm.rsaSignatureMessagePKCS1v15SHA1
+func sign(_ data: Data, withKey key: SecKey, using algorithm: SecKeyAlgorithm) -> Data? {
     var error: Unmanaged<CFError>?
     guard let signature = SecKeyCreateSignature(
         key,
@@ -127,4 +176,14 @@ func sign(_ data: Data, withKey key: SecKey) -> Data? {
         return nil
     }
     return signature
+}
+
+func signSHA1(_ data: Data, withKey key: SecKey) -> Data? {
+    let algorithm = SecKeyAlgorithm.rsaSignatureMessagePKCS1v15SHA1
+    return sign(data, withKey: key, using: algorithm)
+}
+
+func signSHA256(_ data: Data, withKey key: SecKey) -> Data? {
+    let algorithm = SecKeyAlgorithm.rsaSignatureMessagePKCS1v15SHA256
+    return sign(data, withKey: key, using: algorithm)
 }

@@ -11,7 +11,7 @@ struct CloudFrontMiddlewareTests {
     let expires = 1_747_270_308
     let url = "https://example.com"
     let accessId = "FOO"
-    let privateKey = rsaPrivateKeyFromPemString(PRIVATE_KEY_STRING)
+    let privateKey = rsaPrivateKeyFromPemString(RSA_PRIVATE_KEY_STRING)
 
     @Test func signRequestPolicyReturnsExpected() {
         let expectedSignature = "2AX-VxZP-D4SDZRTFPKYuMuFFiWT6oxMiZnrx4bdd9SgxWGl-JfeS1YoO4l2l~Hmf26WigIW2P~Deypbecc86qCexQrhs1dRQ1mBm4C1FSXPBCIyXUTK~MAR7EjP-iSElGSBNK3J3B7q8PT-ykieLJsB5ZbBKtw7~wmAGeng6HwHIXSnBLEqBzCSzZobuICv7f3xVNumxHF6Ibolz4uhk0jgEK7-GaikcumIVizAjrtEVY3BEQgje6t1SJeP0HxMqp1~9QH8yu95TMWXyEISvvpeBETxWm7rIyjrugU0J4f~Y2plgnV3yZA0iyeS7sACcUtm-rOJzO9VpmbBZQXuhg__"
