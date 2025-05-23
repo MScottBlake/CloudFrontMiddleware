@@ -8,10 +8,8 @@
 import Foundation
 import Security
 
-let BUNDLE_ID = "com.github.aaronburchfield.cloudfront" as CFString
-let CERT_PREFERENCE_NAME = "cloudfront_certificate"
-let KEYFILENAME = "munkiaccess.pem"
-let KEYFILEPATH = (Bundle.main.bundlePath as NSString).appendingPathComponent("middleware/\(KEYFILENAME)")
+private let BUNDLE_ID = "com.github.aaronburchfield.cloudfront" as CFString
+private let CERT_PREFERENCE_NAME = "cloudfront_certificate"
 
 /// read a preference
 func pref(_ prefName: String) -> Any? {
@@ -20,6 +18,13 @@ func pref(_ prefName: String) -> Any? {
 
 /// Attempt to get the private key, first trying preferences, then looking for a local file
 func getPrivateKey() -> SecKey? {
+    // paths to search for file containing our private key
+    let keyFilename = "munkiaccess.pem"
+    let keyFilePaths = [
+        (Bundle.main.bundlePath as NSString).appendingPathComponent("middleware/\(keyFilename)"),
+        (Bundle.main.bundlePath as NSString).appendingPathComponent(keyFilename)
+    ]
+    
     if let prefCert = pref(CERT_PREFERENCE_NAME) as? String {
         // this should be a base64-encoded string
         if let data = Data(base64Encoded: prefCert) {
@@ -32,13 +37,14 @@ func getPrivateKey() -> SecKey? {
         return rsaPrivateKeyFromPemData(prefCert)
     }
     // pref wasn't set, or wrong type, try to read from a file
-    if FileManager.default.fileExists(atPath: KEYFILEPATH) {
-        if let data = FileManager.default.contents(atPath: KEYFILEPATH) {
+    for pathname in keyFilePaths {
+        if FileManager.default.fileExists(atPath: pathname),
+           let data = FileManager.default.contents(atPath: pathname)
+        {
             return rsaPrivateKeyFromPemData(data)
-        } else {
-            return nil
         }
     }
+    
     // we got nothin'
     return nil
 }
@@ -105,7 +111,7 @@ func generateCloudFrontURL(_ url: String) -> String {
 class CloudFrontMiddleware: MunkiMiddleware {
     /// Modify the request URL to contain a signature for CloudFront
     func processRequest(_ request: MunkiMiddlewareRequest) -> MunkiMiddlewareRequest {
-        // TODO: don't modify the URL id it's not a CloudFront URL
+        // TODO: don't modify the URL if it's not a CloudFront URL
         // IOW, check if URL contains cloudfront.net, or a specific domain specified
         // by the admin in a preference. Similar to how the s3 middleware does it:
         // let s3endpoint = pref("S3Endpoint") as? String ?? "s3.amazonaws.com"
