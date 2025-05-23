@@ -22,9 +22,9 @@ func getPrivateKey() -> SecKey? {
     let keyFilename = "munkiaccess.pem"
     let keyFilePaths = [
         (Bundle.main.bundlePath as NSString).appendingPathComponent("middleware/\(keyFilename)"),
-        (Bundle.main.bundlePath as NSString).appendingPathComponent(keyFilename)
+        (Bundle.main.bundlePath as NSString).appendingPathComponent(keyFilename),
     ]
-    
+
     if let prefCert = pref(CERT_PREFERENCE_NAME) as? String {
         // this should be a base64-encoded string
         if let data = Data(base64Encoded: prefCert) {
@@ -44,7 +44,7 @@ func getPrivateKey() -> SecKey? {
             return rsaPrivateKeyFromPemData(data)
         }
     }
-    
+
     // we got nothin'
     return nil
 }
