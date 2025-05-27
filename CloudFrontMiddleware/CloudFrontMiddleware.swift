@@ -50,9 +50,9 @@ func getPrivateKey() -> SecKey? {
 }
 
 /// Return a request policy signature.
-func signRequestPolicy(_ requestPolicy: String, withKey key: SecKey) -> String {
+func signRequestPolicy(_ requestPolicy: String, withKey key: SecKey) -> String? {
     guard let signatureData = signSHA1(Data(requestPolicy.utf8), withKey: key) else {
-        return ""
+        return nil
     }
     let signtureString = signatureData.base64EncodedString()
     return signtureString
@@ -92,7 +92,10 @@ func assembleCloudFrontRequest(url: String, key: SecKey, accessId: String, expir
     // Format a request policy for the resource
     let requestPolicy = makeJsonPolicyRequest(url: url, expires: expires)
     // Sign and encode request policy
-    let signature = signRequestPolicy(requestPolicy, withKey: key)
+    guard let signature = signRequestPolicy(requestPolicy, withKey: key) else {
+        print("ERROR: could not sign request policy")
+        return url
+    }
     // Format and return the final request URL
     return "\(url)?Expires=\(expires)&Signature=\(signature)&Key-Pair-Id=\(accessId)"
 }
@@ -100,6 +103,7 @@ func assembleCloudFrontRequest(url: String, key: SecKey, accessId: String, expir
 /// Generate a CloudFront URL
 func generateCloudFrontURL(_ url: String) -> String {
     guard let key = getPrivateKey() else {
+        print("ERROR: could not retreive CloudFront private key")
         return url
     }
     let accessId = pref("access_id") as? String ?? ""
