@@ -22,9 +22,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Xcode
-        run: |
-          xcodes install "${XCODE_VER}" \
-            --apple-id "${{ secrets.APPLE_ID }}" \
+        run: >
+          xcodes install "${XCODE_VER}"
+            --apple-id "${{ secrets.APPLE_ID }}"
             --password "${{ secrets.APP_SPECIFIC_PASSWORD }}"
 
       - name: Select Xcode
