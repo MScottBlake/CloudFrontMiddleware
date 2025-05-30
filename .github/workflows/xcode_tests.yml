@@ -10,8 +10,11 @@ permissions:
 
 jobs:
   test:
-    name: Run Xcode Tests
-    runs-on: macos-latest
+    name: Run Xcode Tests on macOS ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-13, macos-14, macos-latest]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
