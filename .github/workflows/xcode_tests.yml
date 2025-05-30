@@ -15,9 +15,23 @@ jobs:
     strategy:
       matrix:
         os: [macos-13, macos-14, macos-latest]
+    env:
+      XCODE_VER: 15.5
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Install xcodes
+        run: |
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+          eval "$(/opt/homebrew/bin/brew shellenv)"
+          /opt/homebrew/bin/brew install xcodesorg/made/xcodes
+
+      - name: Install Xcode
+        run: xcodes install ${XCODE_VER}
+
+      - name: Select Xcode
+        run: sudo xcode-select -switch /Applications/Xcode_${XCODE_VER}.app/Contents/Developer
 
       - name: Run Xcode Tests
         env:
