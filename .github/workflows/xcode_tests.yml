@@ -1,0 +1,40 @@
+name: Xcode Tests
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Run Xcode Tests
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Xcode Tests
+        env:
+          TOOL: "CloudFrontMiddleware"
+        run: |
+          echo "Running tests for ${TOOL}..."
+          xcodebuild test \
+            -project "${TOOL}.xcodeproj" \
+            -configuration Debug \
+            -scheme "${TOOL}" \
+            -destination "platform=macOS" \
+            -resultBundlePath test_results
+
+      - name: Install xcpretty
+        run: gem install xcpretty
+
+      - name: Convert Xcode Results to JUnit
+        run: xcpretty --report junit --output test-results.xml
+
+      - name: Upload Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        with:
+          files: "test-results.xml"
