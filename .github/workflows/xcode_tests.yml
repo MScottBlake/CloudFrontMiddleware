@@ -21,12 +21,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install Xcode
-        env:
-          XCODES_USERNAME: ${{ secrets.APPLE_ACCOUNT_USERNAME }}
-          XCODES_PASSWORD: ${{ secrets.APPLE_ACCOUNT_PASSWORD }}
-        run: |
-          xcodes install "${XCODE_VER}"
+      # - name: Install Xcode
+      #   env:
+      #     XCODES_USERNAME: ${{ secrets.APPLE_ACCOUNT_USERNAME }}
+      #     XCODES_PASSWORD: ${{ secrets.APPLE_ACCOUNT_PASSWORD }}
+      #   run: |
+      #     xcodes install "${XCODE_VER}"
 
       - name: Select Xcode
         run: sudo xcode-select -switch "/Applications/Xcode_${XCODE_VER}.app/Contents/Developer"
