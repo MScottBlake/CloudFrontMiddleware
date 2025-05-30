@@ -28,12 +28,12 @@ jobs:
           /opt/homebrew/bin/brew install xcodesorg/made/xcodes
 
       - name: Install Xcode
-        run: xcodes install ${XCODE_VER} \
+        run: xcodes install "${XCODE_VER}" \
           --apple-id "${{ secrets.APPLE_ID }}" \
           --password "${{ secrets.APP_SPECIFIC_PASSWORD }}"
 
       - name: Select Xcode
-        run: sudo xcode-select -switch /Applications/Xcode_${XCODE_VER}.app/Contents/Developer
+        run: sudo xcode-select -switch "/Applications/Xcode_${XCODE_VER}.app/Contents/Developer"
 
       - name: Run Xcode Tests
         env:
