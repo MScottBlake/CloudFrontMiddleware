@@ -23,8 +23,8 @@ jobs:
 
       - name: Install Xcode
         env:
-          XCODES_USERNAME: ${{ secrets.APPLE_ID }}
-          XCODES_PASSWORD: ${{ secrets.APP_SPECIFIC_PASSWORD }}
+          XCODES_USERNAME: ${{ secrets.APPLE_ACCOUNT_USERNAME }}
+          XCODES_PASSWORD: ${{ secrets.APPLE_ACCOUNT_PASSWORD }}
         run: |
           xcodes install "${XCODE_VER}"
 
